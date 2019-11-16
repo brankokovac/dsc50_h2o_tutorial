@@ -8,7 +8,7 @@
 
 ## Classification Part One: H2O AutoML
 
-# Let's go
+# Let's go!
 library(h2o) # for H2O Machine Learning
 library(mlbench) # for Datasets
 

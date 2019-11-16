@@ -1,4 +1,4 @@
-### "End-to-End Machine Learning with H2O DSC5.0 Tutorial
+### End-to-End Machine Learning with H2O DSC5.0 Tutorial
 ### https://bit.ly/dsc50_h2o_tutorial
 ###
 ### Lecturer: Branko Kovac, Logikka
