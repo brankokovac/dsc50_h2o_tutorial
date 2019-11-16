@@ -11,7 +11,7 @@
 
 ## Additional Info
 
-- H2O-3 user guide http://docs.h2o.ai/h2o/latest-stable/h2o-docs/index.html 
+- H2O-3 user guide (http://docs.h2o.ai/h2o/latest-stable/h2o-docs/index.html)
 - H2O-3 tutorials (https://github.com/h2oai/h2o-tutorials)
-- Java debugging tips (https://twitter.com/ledell/status/1148512123083010048)
+- Predictive Models: Explore, Explain and Debug, P. Biecek and T. Burzykowski (https://pbiecek.github.io/PM_VEE/)
 - H2O-3 XGBoost on Windows (https://stackoverflow.com/questions/49752125/xgboost-h2o-error-on-windows-os)
