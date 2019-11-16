@@ -1,0 +1,210 @@
+---
+title: "End-to-End Machine Learning with H2O DSC5.0 Tutorial, Part 2 (bit.ly/dsc50_h2o_tutorial)"
+date: "`r Sys.Date()`"
+output:
+  rmdformats::readthedown:
+    number_sections: yes
+    fig_height: 10
+    fig_width: 14
+    highlight: kate
+    toc_depth: 3
+    css: style.css
+    
+---
+
+
+```{r knitr_init, echo=FALSE, cache=FALSE}
+library(knitr)
+library(rmdformats)
+library(DT)
+
+## Global options
+options(max.print="75")
+opts_chunk$set(echo=TRUE,
+	             cache=FALSE,
+               prompt=FALSE,
+               tidy=TRUE,
+               comment=NA,
+               message=FALSE,
+               warning=FALSE)
+opts_knit$set(width=75)
+```
+
+# Classification Part One: H2O AutoML
+
+```{r, message=FALSE}
+# Let's go
+library(h2o) # for H2O Machine Learning
+library(mlbench) # for Datasets
+```
+
+```{r}
+# Enter your lucky seed here ...
+n_seed <- 12345
+```
+
+## Data - Pima Indians Diabetes from `mlbench`
+
+```{r}
+data("PimaIndiansDiabetes")
+datatable(head(PimaIndiansDiabetes), 
+          rownames = FALSE, options = list(pageLength = 6, scrollX = TRUE))
+```
+
+
+## Data Prep
+
+```{r}
+# Convert pos and neg to 1 and 0
+d_new <- PimaIndiansDiabetes[, -ncol(PimaIndiansDiabetes)]
+d_new$diabetes <- 0
+d_new[which(PimaIndiansDiabetes$diabetes == "pos"), ]$diabetes <- 1
+PimaIndiansDiabetes <- d_new
+rm(d_new)
+```
+
+```{r}
+target <- "diabetes" 
+features <- setdiff(colnames(PimaIndiansDiabetes), target)
+print(features)
+```
+
+
+
+## Start a local H2O Cluster (JVM)
+
+```{r}
+h2o.init()
+```
+
+```{r}
+h2o.no_progress() # disable progress bar for RMarkdown
+h2o.removeAll()   # Optional: remove anything from previous session 
+```
+
+
+
+## Convert R dataframe into H2O dataframe
+
+```{r}
+# H2O dataframe
+h_diabetes <- as.h2o(PimaIndiansDiabetes)
+
+# Make sure the target is a factor (for classification)
+h_diabetes$diabetes <- as.factor(h_diabetes$diabetes)
+```
+
+
+
+## Split Data into Train/Test
+
+```{r}
+h_split <- h2o.splitFrame(h_diabetes, ratios = 0.8, seed = n_seed)
+h_train <- h_split[[1]] # 80% for modelling
+h_test <- h_split[[2]] # 20% for evaluation
+```
+
+```{r}
+dim(h_train)
+dim(h_test)
+```
+
+
+## H2O AutoML
+
+```{r}
+# Run AutoML (try n different models)
+# Check out all options using ?h2o.automl
+automl = h2o.automl(x = features,
+                    y = target,
+                    training_frame = h_train,
+                    nfolds = 5,                        # 5-fold Cross-Validation
+                    max_models = 20,                   # Max number of models
+                    stopping_metric = "logloss",       # Metric to optimize
+                    project_name = "automl_diabetes",  # Specify a name so you can add more models later
+                    sort_metric = "logloss",
+                    seed = n_seed)
+```
+
+### Leaderboard
+
+```{r}
+datatable(as.data.frame(automl@leaderboard), 
+          rownames = FALSE, options = list(pageLength = 10, scrollX = TRUE, round)) %>%
+  formatRound(columns = -1, digits = 4)
+```
+
+# Classification Part Two: XAI
+
+## Package `DALEX`
+
+```{r}
+# Descriptive mAchine Learning EXplanations (DALEX)
+library(DALEX)
+```
+
+
+### The `explain()` Function
+
+```{r}
+# Custom Predict Function
+custom_predict <- function(model, newdata) {
+  newdata_h2o <- as.h2o(newdata)
+  res <- as.data.frame(h2o.predict(model, newdata_h2o))
+  return(round(res$p1)) # round the probabil
+  }
+```
+
+### Explainer for H2O Models
+
+```{r}
+explainer_automl <- DALEX::explain(model = automl@leader, 
+                                data = as.data.frame(h_test)[, features],
+                                y = as.numeric(as.character(as.data.frame(h_test)[, target])),
+                                predict_function = custom_predict,
+                                label = "H2O AutoML")
+```
+
+### Variable importance
+
+```{r}
+library(ingredients)
+vi_automl <- feature_importance(explainer_automl, type="difference")
+plot(vi_automl)
+```
+
+
+### Partial Dependence Plots
+
+Let's look at feature `age` 
+
+```{r}
+pdp_automl_rm <- partial_dependency(explainer_automl, variables = "age")
+plot(pdp_automl_rm)
+```
+
+
+## Prediction Understanding
+
+```{r}
+library(iBreakDown)
+```
+
+```{r}
+# Prediction: Diabetes = Negative (0)
+pb_automl <- break_down(explainer_automl, new_observation = as.data.frame(h_test)[1, ])
+plot(pb_automl)
+```
+
+
+```{r}
+# Prediction: Diabetes = Positive (1)
+pb_automl <- break_down(explainer_automl, new_observation = as.data.frame(h_test)[6, ])
+plot(pb_automl)
+```
+
+
+# Bring Your Own Data + Q&A
+
+Get your hands dirty!
+
