@@ -5,8 +5,8 @@
 - `scripts/setup.R`: install packages required
 - `rmd/tutorial_pt1.Rmd`: the part 1 RMarkdown file with code
 - `rmd/tutorial_pt2.Rmd`: the part 2 RMarkdown file with code
-- `html/tutorial_pt1.html`: rendered part 1 RMarkdown result[view](https://nbviewer.jupyter.org/github/brankokovac/dsc50_h2o_tutorial/blob/master/html/tutorial_pt1.html)
-- `html/tutorial_pt2.html`: rendered part 2 RMarkdown result[view](https://nbviewer.jupyter.org/github/brankokovac/dsc50_h2o_tutorial/blob/master/html/tutorial_pt2.html)
+- `html/tutorial_pt1.html`: rendered part 1 RMarkdown result [view](https://nbviewer.jupyter.org/github/brankokovac/dsc50_h2o_tutorial/blob/master/html/tutorial_pt1.html)
+- `html/tutorial_pt2.html`: rendered part 2 RMarkdown result [view](https://nbviewer.jupyter.org/github/brankokovac/dsc50_h2o_tutorial/blob/master/html/tutorial_pt2.html)
 - `pres.pdf`: PDF presentation
 
 ## Additional Info
